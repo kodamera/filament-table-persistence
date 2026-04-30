@@ -87,20 +87,34 @@ Make sure the published migration uses the same column name.
 ],
 ```
 
-## Configuration
+## Usage
 
-### With a Filament panel (`filament/filament` installed)
-
-Add the plugin to every panel that should persist table state. Panels without it are unaffected, so panels in the same app can opt out simply by not registering the plugin.
+Register the plugin on every panel that should persist table state. Panels without it are unaffected, so panels in the same app can opt out simply by not registering the plugin.
 
 ```php
+use Filament\Panel;
 use Kodamera\FilamentTablePersistence\TablePersistencePlugin;
 
-$panel->plugins([
-    TablePersistencePlugin::make()
-        ->except([\App\Filament\Resources\AuditLog\Pages\ListAuditLogs::class]),
-]);
+public function panel(Panel $panel): Panel
+{
+    return $panel
+        // ...
+        ->plugins([
+            TablePersistencePlugin::make(),
+        ]);
+}
 ```
+
+Once registered, persistence is automatic: when a user toggles column visibility, the new state is written to `filament_table_preferences` and re-applied on every subsequent visit — across logouts, session resets, and different browsers. Each table is keyed by `(user_id, table_identifier)`.
+
+To exclude specific pages:
+
+```php
+TablePersistencePlugin::make()
+    ->except([\App\Filament\Resources\AuditLog\Pages\ListAuditLogs::class]),
+```
+
+## Configuration
 
 ### Without a panel (or in non-Filament Livewire apps using `filament/tables`)
 
@@ -137,46 +151,6 @@ class ListUsers extends \Filament\Resources\Pages\ListRecords
     use \Kodamera\FilamentTablePersistence\Concerns\PersistsTableState;
 }
 ```
-
-## How it works
-
-Filament's table column manager reads/writes `session('tables.{md5(class)}_columns')`. This package:
-
-1. On Livewire `mount`/`hydrate`, loads the row from `filament_table_preferences` and seeds the same session key.
-2. On Livewire `dehydrate`, mirrors any changes back to the database.
-
-We never override Filament internals. The session is the fast path; the DB is the durable backing store.
-
-## Schema
-
-Single JSON `preferences` column so future features (filters, sort, per-page, search, presets) slot in without migrations:
-
-```php
-Schema::create('filament_table_preferences', function (Blueprint $t) {
-    $t->id();
-    $t->string('user_id')->index();          // string handles bigint, UUID, ULID
-    $t->string('table_identifier');           // matches Filament's md5(class) key
-    $t->json('preferences');                  // { columns: [...], filters: {...}, ... }
-    $t->timestamps();
-    $t->unique(['user_id', 'table_identifier']);
-});
-```
-
-`user_id` is stored as a string to support bigint, UUID, and ULID auth identifiers without configuration. Auth resolution prefers `Filament::auth()->user()` so panel-specific guards work; falls back to `Auth::user()`.
-
-## Multi-tenancy
-
-Tenant scoping is not built in. Extension path: add a nullable `tenant_id` column in your own migration and a `tenant_foreign_key` config; the unique key becomes `(user_id, tenant_id, table_identifier)`. We'll add first-class support in a future minor release.
-
-## Roadmap
-
-- Filter persistence
-- Sort persistence
-- Search persistence
-- Per-page (pagination size) persistence
-- Reset action UI
-- Shared / role-based presets
-- Cache layer (Redis/Memcached) as the fast path
 
 ## Development
 

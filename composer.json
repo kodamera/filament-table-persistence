@@ -1,0 +1,75 @@
+{
+    "name": "kodamera/filament-table-persistence",
+    "description": "Persist Filament table state (column visibility) to the database, per user, across sessions.",
+    "keywords": [
+        "filament",
+        "laravel",
+        "livewire",
+        "tables",
+        "persistence",
+        "preferences"
+    ],
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Kodamera",
+            "email": "oliver@kodamera.se"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "filament/tables": "^4.0|^5.0",
+        "illuminate/database": "^11.0|^12.0",
+        "illuminate/support": "^11.0|^12.0"
+    },
+    "require-dev": {
+        "filament/filament": "^4.0|^5.0",
+        "laravel/pint": "^1.18",
+        "larastan/larastan": "^3.0",
+        "orchestra/testbench": "^9.0|^10.0",
+        "pestphp/pest": "^3.0",
+        "pestphp/pest-plugin-laravel": "^3.0",
+        "rector/rector": "^2.0"
+    },
+    "suggest": {
+        "filament/filament": "Required to register the package via PanelProvider plugins() — without it, configure via the static TablePersistence::configure() API or config file."
+    },
+    "autoload": {
+        "psr-4": {
+            "Kodamera\\FilamentTablePersistence\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Kodamera\\FilamentTablePersistence\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/pest",
+        "format": "vendor/bin/pint",
+        "analyse": "vendor/bin/phpstan analyse --memory-limit=1G",
+        "rector": "vendor/bin/rector --dry-run",
+        "ci": [
+            "@format --test",
+            "@analyse",
+            "@rector",
+            "@test"
+        ]
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Kodamera\\FilamentTablePersistence\\TablePersistenceServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

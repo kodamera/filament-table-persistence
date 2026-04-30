@@ -1,0 +1,14 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    level: 8
+    paths:
+        - src
+        - tests
+    excludePaths:
+        - tests/Fixtures/*
+    ignoreErrors:
+        -
+            identifier: trait.unused
+            path: src/Concerns/PersistsTableState.php

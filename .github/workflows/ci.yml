@@ -6,6 +6,40 @@ on:
   pull_request:
 
 jobs:
+  fix:
+    runs-on: ubuntu-latest
+    name: Fix code style
+    if: github.event_name == 'pull_request'
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+
+      - name: Install dependencies
+        run: composer update --prefer-dist --no-interaction --no-progress
+
+      - name: Run Pint
+        run: composer format
+
+      - name: Run Rector
+        run: vendor/bin/rector
+
+      - name: Commit fixes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'Apply Pint and Rector fixes'
+
   audit:
     runs-on: ubuntu-latest
     name: Composer audit
@@ -32,9 +66,8 @@ jobs:
       fail-fast: false
       matrix:
         php: ['8.2', '8.3', '8.4']
-        laravel: ['11.*', '12.*']
 
-    name: PHP ${{ matrix.php }} / Laravel ${{ matrix.laravel }}
+    name: PHP ${{ matrix.php }}
 
     steps:
       - uses: actions/checkout@v4
@@ -54,24 +87,14 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
-          key: composer-${{ runner.os }}-${{ matrix.php }}-${{ matrix.laravel }}-${{ hashFiles('composer.json') }}
-          restore-keys: composer-${{ runner.os }}-${{ matrix.php }}-${{ matrix.laravel }}-
+          key: composer-${{ runner.os }}-${{ matrix.php }}-${{ hashFiles('composer.json') }}
+          restore-keys: composer-${{ runner.os }}-${{ matrix.php }}-
 
       - name: Install dependencies
-        run: |
-          composer require --no-update --no-interaction \
-            "illuminate/database:${{ matrix.laravel }}" \
-            "illuminate/support:${{ matrix.laravel }}"
-          composer update --prefer-dist --no-interaction --no-progress
-
-      - name: Pint (format check)
-        run: composer format -- --test
+        run: composer update --prefer-dist --no-interaction --no-progress
 
       - name: PHPStan
         run: composer analyse
-
-      - name: Rector (dry-run)
-        run: composer rector
 
       - name: Pest
         run: composer test

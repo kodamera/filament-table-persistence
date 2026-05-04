@@ -37,7 +37,7 @@ class TablePreferenceLoader
             ->first();
 
         /** @var array<string, mixed> $preferences */
-        $preferences = $preference?->preferences ?? [];
+        $preferences = $preference->preferences ?? [];
 
         if ((bool) config('filament-table-persistence.features.columns', true)) {
             if (isset($preferences['columns']) && is_array($preferences['columns'])) {

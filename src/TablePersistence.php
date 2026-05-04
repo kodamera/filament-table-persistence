@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Kodamera\FilamentTablePersistence;
 
+use Throwable;
 use Closure;
 use Filament\Facades\Filament;
 use Illuminate\Contracts\Auth\Authenticatable;
@@ -108,7 +109,7 @@ class TablePersistence
 
         try {
             $panel = Filament::getCurrentPanel();
-        } catch (\Throwable) {
+        } catch (Throwable) {
             return true;
         }
 

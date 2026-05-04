@@ -6,6 +6,40 @@ on:
   pull_request:
 
 jobs:
+  fix:
+    runs-on: ubuntu-latest
+    name: Fix code style
+    if: github.event_name == 'pull_request'
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+
+      - name: Install dependencies
+        run: composer update --prefer-dist --no-interaction --no-progress
+
+      - name: Run Pint
+        run: composer format
+
+      - name: Run Rector
+        run: vendor/bin/rector
+
+      - name: Commit fixes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'Apply Pint and Rector fixes'
+
   audit:
     runs-on: ubuntu-latest
     name: Composer audit
@@ -59,14 +93,8 @@ jobs:
       - name: Install dependencies
         run: composer update --prefer-dist --no-interaction --no-progress
 
-      - name: Pint (format check)
-        run: composer format -- --test
-
       - name: PHPStan
         run: composer analyse
-
-      - name: Rector (dry-run)
-        run: composer rector
 
       - name: Pest
         run: composer test

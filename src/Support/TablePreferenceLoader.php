@@ -21,7 +21,7 @@ class TablePreferenceLoader
     {
         $user = TablePersistence::user();
 
-        if (!$user instanceof Authenticatable) {
+        if (! $user instanceof Authenticatable) {
             return;
         }
 

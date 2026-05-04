@@ -35,7 +35,7 @@ class TablePersistenceHook extends ComponentHook
     {
         $component = $this->resolveApplicableComponent();
 
-        if (!$component instanceof Component) {
+        if (! $component instanceof Component) {
             return;
         }
 
@@ -46,7 +46,7 @@ class TablePersistenceHook extends ComponentHook
     {
         $component = $this->resolveApplicableComponent();
 
-        if (!$component instanceof Component) {
+        if (! $component instanceof Component) {
             return;
         }
 

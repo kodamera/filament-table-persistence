@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Kodamera\FilamentTablePersistence;
 
-use Throwable;
 use Closure;
 use Filament\Facades\Filament;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
+use Throwable;
 
 /**
  * Static facade holding the global table-persistence configuration.
